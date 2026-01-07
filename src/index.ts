@@ -36,26 +36,27 @@ const app = new Elysia({ prefix: '/api' })
 
         const inputTensor = new ort.Tensor('string', [cleanedText], [1, 1]);
         
-        // PERBAIKAN TS2538: Pastikan inputName tidak undefined
+        // SOLUSI TS2538: Pastikan inputName adalah string, bukan undefined
         const inputName = session.inputNames[0];
-        if (typeof inputName !== 'string') {
-            throw new Error('Model input name is missing or invalid');
+        if (!inputName) {
+            throw new Error('Model input name is undefined');
         }
         
+        // Beri tahu TypeScript bahwa objek ini akan menggunakan kunci string
         const feeds: Record<string, ort.Tensor> = {};
         feeds[inputName] = inputTensor;
 
         const results = await session.run(feeds);
         
-        // PERBAIKAN TS2538: Pastikan outputName tidak undefined
+        // SOLUSI TS2538: Pastikan outputName adalah string, bukan undefined
         const outputName = session.outputNames[0];
-        if (typeof outputName !== 'string') {
-            throw new Error('Model output name is missing or invalid');
+        if (!outputName) {
+            throw new Error('Model output name is undefined');
         }
         
         const outputTensor = results[outputName];
         if (!outputTensor) {
-            throw new Error('Prediction failed: Output tensor not found');
+            throw new Error('Output tensor not found');
         }
 
         const prediction = outputTensor.data[0];
@@ -69,5 +70,9 @@ const app = new Elysia({ prefix: '/api' })
         body: t.Object({ text: t.String() })
     });
 
+// Handler untuk Vercel Serverless
 export const POST = (req: Request) => app.handle(req);
 export const GET = (req: Request) => app.handle(req);
+
+// Opsional: Tetap jalankan listen agar bisa ditest di lokal (localhost:3001)
+app.listen(3001);
