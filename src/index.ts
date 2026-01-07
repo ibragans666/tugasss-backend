@@ -20,7 +20,7 @@ function preprocessText(text: string): string {
         .join(' ');
 }
 
-// Load model menggunakan path absolut agar terbaca di environment Vercel
+// Di dalam src/index.ts
 const modelPath = path.resolve(process.cwd(), 'model/depression_pipeline.onnx');
 const session = await ort.InferenceSession.create(modelPath);
 
